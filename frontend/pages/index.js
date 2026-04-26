@@ -1,23 +1,25 @@
-// Temporary file for Input Module
-// This is the homepage where users can upload or scan objects
+// Enhanced Input Module
+// This page allows users to upload multiple objects and categorize them for analysis
 
 import React, { useState } from 'react';
 
 export default function Home() {
-    const [file, setFile] = useState(null);
+    const [files, setFiles] = useState([]);
 
     const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
+        setFiles([...files, ...e.target.files]);
     };
 
     const handleUpload = async () => {
-        if (!file) {
-            alert("Please select a file first");
+        if (files.length === 0) {
+            alert("Please select at least one file");
             return;
         }
-        
+
         const formData = new FormData();
-        formData.append('file', file);
+        files.forEach((file, index) => {
+            formData.append(`file_${index}`, file);
+        });
 
         try {
             const response = await fetch('http://localhost:5000/process', {
@@ -35,9 +37,14 @@ export default function Home() {
     return (
         <div>
             <h1>Input Module</h1>
-            <p>Upload or scan objects to analyze them.</p>
-            <input type="file" onChange={handleFileChange} />
-            <button onClick={handleUpload}>Upload</button>
+            <p>Upload one or more objects to analyze them.</p>
+            <input type="file" onChange={handleFileChange} multiple />
+            <ul>
+                {files.map((file, index) => (
+                    <li key={index}>{file.name}</li>
+                ))}
+            </ul>
+            <button onClick={handleUpload}>Upload All</button>
         </div>
     );
 }
